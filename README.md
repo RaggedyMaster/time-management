@@ -16,3 +16,4 @@ Date:2018/3/23
 数据加密方式使用AES，密钥可更改
 环境Python3.6.4
 扩展包PyQt5、matplotlib、pycryptodome
+背景图片为Source文件夹下2.jpg
