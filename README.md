@@ -17,4 +17,4 @@ Date:2018/3/23<br>
 环境Python3.6.4<br>
 扩展包PyQt5、matplotlib、pycryptodome<br>
 背景图片为Source文件夹下2.jpg<br>
-![](https://github.com/RaggedyMaster/time-management/Time-Management.jpg)
+![](https://github.com/RaggedyMaster/time-management/blob/master/Time-Management.jpg)
