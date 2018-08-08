@@ -1,4 +1,5 @@
 # Time-Management
+![](https://github.com/RaggedyMaster/time-management/blob/master/Time-Management.jpg)
 34枚金币时间管理法由艾力老师提出;微博：@艾力酷艾英语
 本代码为该方法的实现<br>
 Author:RaggedyMaster<br>
@@ -17,4 +18,3 @@ Date:2018/3/23<br>
 环境Python3.6.4<br>
 扩展包PyQt5、matplotlib、pycryptodome<br>
 背景图片为Source文件夹下2.jpg<br>
-![](https://github.com/RaggedyMaster/time-management/blob/master/Time-Management.jpg)
