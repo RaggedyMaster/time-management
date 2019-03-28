@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import Mygui,os
 import calendar
 import datetime
-from PyQt5.QtWidgets import QMainWindow,QTableWidgetItem,QColorDialog,QHeaderView,QAbstractItemView,QFrame,QApplication,QLineEdit,QMessageBox
-from PyQt5.QtCore import Qt,QDate,QSize   # 导入相应的包
+from math import floor
+from PyQt5.QtWidgets import QMainWindow,QTableWidgetItem,QColorDialog,QHeaderView,QAbstractItemView,QFrame,QApplication,QLineEdit,QMessageBox,QStyleFactory
+from PyQt5.QtCore import Qt,QDate,QSize # 导入相应的包
 from PyQt5.QtGui import QColor,QFont,QIcon,QPixmap,QKeyEvent
 from Mysqlite import ReadSqlite,ReadSqliteDayColor,WriteSqlite,DeleteSqlite,ReadSqliteEventColor
 from MyAES import decrypt_oralce,encrypt_oracle
@@ -13,11 +15,19 @@ from matplotlib import rcParams
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import random
+import threading
+from MyWordCloud import CloudCreat
+
+L = threading.Lock()
+L_wc=threading.Lock()
 
 class MyClass(QMainWindow):
 
     NameDB='.\\Source\\test.db'
-    key='pg'
+    LoginBK='./Source/Login/'
+    BK='./Source/BK/'
+    key='helloword'
     ColorCanChange='#5555ff'
     ColorDateDefault='#e5e5e5'
     ColorFontDefault='#bcbcbc'
@@ -65,6 +75,7 @@ class MyClass(QMainWindow):
     month = QDate.currentDate().month()
     day = QDate.currentDate().day()
     sbit_first=0
+    text=[]
     def __init__(self, parent=None):
         super(MyClass,self).__init__(parent)
         self.ui=Mygui.Ui_MainWindow()
@@ -78,16 +89,24 @@ class MyClass(QMainWindow):
         self.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)#列宽自动适应
         # self.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)#行高
 
+        listT=os.listdir(self.LoginBK)        
+        self.LoginBK=self.LoginBK+listT[random.randint(0,len(listT)-1)]
+        listT=os.listdir(self.BK)
+        
+        self.BK=self.BK+listT[random.randint(0,len(listT)-1)]
+        
         self.KeyInit()
         self.ui.tableWidget.setFrameShape(QFrame.NoFrame)  # 无边框显示
         self.ui.textEdit.setFrameShape(QFrame.NoFrame)  # 无边框显示
-        self.ui.widget.setStyleSheet("border-image: url(./Source/2.jpg);")
-        self.ui.menuBar.setStyleSheet("background-image: url(./Source/2.jpg);color: white")
-        self.ui.statusbar.setStyleSheet("background-image: url(./Source/2.jpg);color: white")
+        
+        self.ui.widget.setStyleSheet("border-image: url("+self.LoginBK+");")
+        self.ui.menuBar.setStyleSheet("background-image: url("+self.LoginBK+");color: white")
+        self.ui.statusbar.setStyleSheet("background-image: url("+self.LoginBK+");color: white")
+        
         self.ui.textEdit.setStyleSheet("border-image: url(./Source/paper1.jpg);")
         self.ui.textEdit.setFont(QFont("楷体", 12))
-        # self.setWindowTitle('Once Upon A Time')
-        self.setWindowTitle('34枚金币时间管理')
+        self.setWindowTitle('Once Upon A Time')
+        # self.setWindowTitle('34枚金币时间管理')
         icon = QIcon()
         icon.addPixmap(QPixmap("./Source/Calender.ico"), QIcon.Normal, QIcon.Off)
         self.setWindowIcon(icon)
@@ -133,18 +152,27 @@ class MyClass(QMainWindow):
 
         Date = self.ui.dateEdit.date()
         self.ColorCount(Date.year(), Date.month(), Date.day(), 0)
-
-        t = Thread(target=self.PaintPie)
-        t.start()
+        #t.start()
 
         self.ui.dateEdit.setDate(QDate.currentDate())
         self.dateinit()
         self.ComboBoxInit()
         self.ScrollBarInit()
         self.ui.action.triggered.connect(self.about)
+
+        self.changeStyle("WindowsVista")
+        self.ui.widget_5.setStyleSheet("border-image: url(./Source/blackboard.png);")
         # self.ui.widget_3.setStyleSheet("border-image: url(./Source/pie.png);")
 
-
+    def WCCreat(self):
+        L_wc.acquire()
+        t_WinSize = self.size()
+        H_widget=(t_WinSize.height()-50)*0.95-510
+        CloudCreat(self.text, os.getcwd() + "\\Source",235,floor(H_widget))
+        self.ui.widget_7.setStyleSheet("border-image: url(./Source/Words/pic.png);")
+        L_wc.release()
+    def changeStyle(self, styleName):
+        QApplication.setStyle(QStyleFactory.create(styleName))
     def Radio3(self):
         Date = self.ui.dateEdit.date()
         self.ColorCount(Date.year(), Date.month(), Date.day(), 0)
@@ -161,7 +189,8 @@ class MyClass(QMainWindow):
         t = Thread(target=self.PaintPie)
         t.start()
     def PaintPie(self):
-
+        L.acquire()
+        
         fig, ax = plt.subplots()
         c = [1]
         rcParams.update({'font.size': 18, 'font.family': 'serif'})
@@ -213,6 +242,8 @@ class MyClass(QMainWindow):
         plt.savefig(os.getcwd() + '\\Source\\plot1.png', format='png', bbox_inches='tight', transparent=True, dpi=100)
         plt.close()
         self.ui.widget_4.setStyleSheet("border-image: url(./Source/plot1.png);")
+
+        L.release()
     def ColorCount(self,year,month,day,mode):
         ColorAll = ReadSqliteEventColor(self.NameDB, year, month, day, mode)
         self.c1=[0]*5
@@ -311,7 +342,7 @@ class MyClass(QMainWindow):
             self.C5.append(C0[4])
     def about(self):
         Box1=QMessageBox()
-        Box1.information(self, "版本1.2", "快捷键说明：\nCtrl+S ：  保存\nAlt+1~5：涂色1~5")
+        Box1.information(self, "test版本1.1", "快捷键说明：\nCtrl+S ：  保存\nAlt+1~5：涂色1~5")
     def AllHide(self):
         self.ui.verticalScrollBar.hide()
         self.ui.dateEdit.hide()
@@ -341,6 +372,8 @@ class MyClass(QMainWindow):
 
         self.ui.widget_3.hide()
         self.ui.widget_4.hide()
+        self.ui.widget_5.hide()
+        self.ui.widget_7.hide()
         self.ui.radioButton.hide()
         self.ui.radioButton_2.hide()
         self.ui.radioButton_3.hide()
@@ -349,13 +382,16 @@ class MyClass(QMainWindow):
         self.setMinimumSize(self.width(),self.height())
         self.setMaximumSize(self.width(),self.height())
     def login(self):
-
         str1=self.ui.lineEdit_2.text()
-        if str1=='123456':
-            self.AllShow()
+        if len(str1)==0:
+                self.AllShow()
         else:
             self.ui.statusbar.showMessage('Get out of here!(╯‵□′)╯︵┴─┴', 2000)
     def AllShow(self):
+        self.ui.widget.setStyleSheet("border-image: url("+self.BK+");")
+        self.ui.menuBar.setStyleSheet("background-image: url("+self.BK+");color: white")
+        self.ui.statusbar.setStyleSheet("background-image: url("+self.BK+");color: white")
+        
         self.ui.lineEdit_2.hide()
         self.setMaximumSize(111111111,111111111)
         self.showMaximized()
@@ -388,6 +424,8 @@ class MyClass(QMainWindow):
 
         self.ui.widget_3.show()
         self.ui.widget_4.show()
+        self.ui.widget_5.show()
+        self.ui.widget_7.show()
         self.ui.radioButton.show()
         self.ui.radioButton_2.show()
         self.ui.radioButton_3.show()
@@ -417,7 +455,7 @@ class MyClass(QMainWindow):
         self.ui.verticalScrollBar.setValue(month-1)
         self.SliderValue=month-1
     def KeyInit(self):
-        self.key=self.key
+        a=1
     def keyPressEvent(self, event):
         keyEvent = QKeyEvent(event)
         if keyEvent.key() == Qt.Key_S:
@@ -582,6 +620,9 @@ class MyClass(QMainWindow):
                 CommentIndex=PosAll.index(DayNow%7)
                 Comment = WeekDate[CommentIndex].Comment
                 self.ui.textEdit.append(decrypt_oralce(self.key,Comment))
+                self.text=decrypt_oralce(self.key,Comment)
+                t_wc = Thread(target=self.WCCreat())
+                t_wc.start()
         else:
             d1 = datetime.date(2013, 11, 4)
             d2 = datetime.date(DYear, DMonth, DDay)
@@ -680,6 +721,9 @@ class MyClass(QMainWindow):
 
         self.ui.widget_5.setMaximumHeight(H_widget)
         self.ui.widget_5.setMinimumHeight(H_widget)
+
+        self.ui.widget_7.setMaximumHeight(floor(H_widget-16))
+        self.ui.widget_7.setMinimumHeight(floor(H_widget-16))
 
     def ResetDate(self):
         DateNow=self.ui.dateEdit.date()

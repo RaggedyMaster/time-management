@@ -9,12 +9,11 @@ from PyInstaller.__main__ import run
 # --clean：清理掉临时文件
 
 if __name__ == '__main__':
-    opts = ['--hidden-import=queue'
+    opts = ['--hidden-import=queue',
             '--paths=D:\Program Files\Python3.6.4\Lib\site-packages\PyQt5\Qt\bin',
             '--paths=D:\Program Files\Python3.6.4\Lib\site-packages\PyQt5\Qt\plugins',
-            '--paths=D:\Program Files\Python3.6.4\Lib\site-packages\Crypto',
-            'MyShow.py',
-            '-w','--icon=Calender.ico'
+            '-w','MyShow.py',
+            '--icon=Calender.ico'
             ]
 
     run(opts)
